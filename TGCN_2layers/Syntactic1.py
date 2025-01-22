@@ -6,11 +6,9 @@ import json
 string.punctuation
 def Syntactic1(location1,location2,index):
 
-    #路径设置
     os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     os.path.abspath(os.path.dirname(os.getcwd()))
     os.path.abspath(os.path.join(os.getcwd(), ".."))
-    #dataset: 20ng  mr  ohsumed R8 R52
     dataset ='mr'
     input = os.sep.join(['..', 'data_tgcn', dataset, 'build_train', dataset])
     output = os.sep.join(['..', 'data_tgcn', dataset, 'stanford'])
@@ -61,7 +59,6 @@ def Syntactic1(location1,location2,index):
             rela_pair_count_str[word_pair_str] = 1
 
     # print(rela_pair_count_str)
-    # 将rela_pair_count_str存成pkl格式
     output1=open(output + '/{}_chsy.pkl'.format(dataset),'wb')
     # output1 = open(output + '/{}_candidates.pkl'.format(dataset), 'wb')
     pickle.dump(rela_pair_count_str, output1)

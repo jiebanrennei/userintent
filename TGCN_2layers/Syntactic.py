@@ -7,17 +7,14 @@ string.punctuation
 def Syntactic(yic_content):
     nlp = StanfordCoreNLP(r'../stanford-corenlp-full-2017-06-09', lang='zh')
 
-    #路径设置
     os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     os.path.abspath(os.path.dirname(os.getcwd()))
     os.path.abspath(os.path.join(os.getcwd(), ".."))
-    #dataset: 20ng  mr  ohsumed R8 R52
     dataset ='mr'
     input = os.sep.join(['..', 'data_tgcn', dataset, 'build_train', dataset])
     output = os.sep.join(['..', 'data_tgcn', dataset, 'stanford'])
     file = open(input + '.chinesefen.txt', "w",encoding="utf-8")
     # file = open(input + '.candidates_fen.txt', "w", encoding="utf-8")
-    #读取病例
     # yic_content_list = []
     # f = open(input + '.chinese.txt', 'r', encoding="utf-8")
     # lines = f.readlines()
@@ -32,7 +29,6 @@ def Syntactic(yic_content):
         for line in f:
             stop_words.add(line.strip())
 
-    #获取句法依存关系对
     rela_pair_count_str = {}
     for doc_id in range(len(yic_content_list)):
         # print(doc_id)
@@ -47,15 +43,9 @@ def Syntactic(yic_content):
                 window = window.replace(i, '')
             # print(window)
             res = nlp.dependency_parse(window)
-            # print('Tokenize:', nlp.word_tokenize(window))
             file.write(' '.join(nlp.word_tokenize(window)))
             file.write("\n")
             fen = nlp.word_tokenize(window)
-            # print(type(nlp.word_tokenize(window)))
-            # print('Part of Speech:', nlp.pos_tag(window))
-            # print('Named Entities:', nlp.ner(window))
-            # print('Constituency Parsing:', nlp.parse(window))
-            # print('Dependency Parsing:', nlp.dependency_parse(window))
 
             for tuple in res:
                 rela.append(tuple[0] + ', ' + str(tuple[1])+ ', ' +str(tuple[2]))
@@ -82,12 +72,9 @@ def Syntactic(yic_content):
                     rela_pair_count_str[word_pair_str] = 1
     file.close()
     nlp.close()
-    # print(rela_pair_count_str)
-    # 将rela_pair_count_str存成pkl格式
     output1=open(output + '/{}_chsy.pkl'.format(dataset),'wb')
     # output1 = open(output + '/{}_candidates.pkl'.format(dataset), 'wb')
     pickle.dump(rela_pair_count_str, output1)
-
 
 # candidates = []
 # candidates_path = '../data_tgcn/mr/build_train/candidates1.txt'

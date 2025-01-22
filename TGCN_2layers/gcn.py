@@ -37,7 +37,6 @@ class GCN(nn.Module):
 
         semantic = self.conv1(semantic, adjC2)
         semantic = self.conv2(semantic, adjC2)
-
         # stacked_tensor = torch.stack((pim, syntactic))
         # emd = torch.mean(stacked_tensor, dim=0)
         #
@@ -47,12 +46,8 @@ class GCN(nn.Module):
         # x = syntactic[length:, :]
         # x = emd[length:, :]
         # return x
-
         pim = pim[length:, :]
-
         syntactic = syntactic[length:, :]
-
         semantic = semantic[length:, :]
-
         return pim,syntactic,semantic
 

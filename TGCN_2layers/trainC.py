@@ -7,16 +7,13 @@ import torch.nn as nn
 import torch.optim as optim
 from sentence_transformers import SentenceTransformer
 
-
 def trainC(location1,location2):
-    # build corpus
     dataset = 'mr'
     os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     os.path.abspath(os.path.dirname(os.getcwd()))
     os.path.abspath(os.path.join(os.getcwd(), ".."))
     input1 = os.sep.join(['..', 'data_tgcn', dataset, 'build_train', dataset])
 
-    # print(input1)'..\\data_tgcn\\mr\\build_train\\mr'
     with open(location1, "rb") as file:
         awordemb = pickle.load(file)
     with open(location2, "rb") as file:
@@ -37,7 +34,6 @@ def trainC(location1,location2):
     for line in lines:
         vocab.append(line.strip())
     f.close()
-    # print(len(vocab))
 
     nonzero_indices = adjC.nonzero()
     nonzero_values = adjC.data
@@ -62,15 +58,10 @@ def trainC(location1,location2):
     nonzero_indices2 = adjC2.nonzero()
     nonzero_values2 = adjC2.data
 
-    # print(nonzero_indices)
-    # print(nonzero_values)
-
     adjC2 = torch.zeros(len(vocab) + len(asentenceemb) + a, len(vocab) + len(asentenceemb) + a, dtype=torch.float)
 
     for i in range(len(nonzero_indices2[0])):
         adjC2[nonzero_indices2[0][i], nonzero_indices2[1][i]] = nonzero_values2[i]
-
-    # print(adjC2)
 
     node_features = torch.zeros(len(vocab) + len(asentenceemb) + a, 768, dtype=torch.float)
     for i in range(len(vocab) + len(asentenceemb) + a):
@@ -91,22 +82,17 @@ def trainC(location1,location2):
     input_dim = 768
     hidden_dim = 1536
     output_dim = 768
-    # 使用模型进行预测
     model = GCN(input_dim, hidden_dim, output_dim)
     model = model.cuda()
-    # 定义模型
     x = x.cuda()
     adjC = adjC.cuda()
     adjC1 = adjC1.cuda()
     adjC2 = adjC2.cuda()
 
     pim,syntactic,semantic= model(x, adjC, adjC1, adjC2, len(vocab))
-
-    # output = model(x, adjC, adjC1, adjC2, len(vocab))
-
-    size = 3  # 定义张量的大小为 3x3
-    adj = torch.ones(size, size)  # 创建一个元素全部为1的张量
-    adj.fill_diagonal_(0)  # 将对角线上的元素设置为零
+    size = 3
+    adj = torch.ones(size, size)
+    adj.fill_diagonal_(0)
     adj = adj.to('cuda')
     model1 = GCN1(input_dim, hidden_dim, output_dim)
     model1 = model1.to('cuda')

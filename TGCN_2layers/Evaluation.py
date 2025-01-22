@@ -24,8 +24,6 @@ def evaluation(cls):
     # Set path to the candidates data
     candidates_path = '../data/candidates'
     # candidates_path = '../data/candidates1'
-
-
     with open (candidates_path, 'rb') as fp:
             candidates = pickle.load(fp)
     # print(len(candidates))
@@ -37,9 +35,6 @@ def evaluation(cls):
     with open('../data_tgcn/mr/build_train/testing_new', 'rb') as fp:
          testing = pickle.load(fp)
 
-    # with open('../data/testing_new1', 'rb') as fp:
-    #      testing = pickle.load(fp)
-
     true_sets = [item[1] for item in testing]
     # print(true_sets)
     golden_labels = true_sets.copy()
@@ -48,7 +43,6 @@ def evaluation(cls):
     true_sets = np.array([create_true_sets(item,candidates) for item in true_sets])
     pred_sets = np.array([create_pred_sets(item,candidates) for item in pred_sets])
 
-    print("检索已完成")
     # Calculate and print the ndcg score for the predicted sets
     ndcg = str(round(cal_ndcg(true_sets, pred_sets, topk=5), 4) * 100)
     print('ndcg: ', ndcg)

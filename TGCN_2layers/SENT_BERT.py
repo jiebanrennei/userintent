@@ -12,8 +12,6 @@ import random
 from candidate_ranker import Candidate_Ranker
 import pickle
 
-
-
 with open ('../data/candidates', 'rb') as fp:
         candidates = pickle.load(fp)
 
@@ -40,7 +38,6 @@ def tune_beta(cls, validation, alpha):
               beta = beta+0.015
     return beta
 
-
 def preprocessing_dataset(cls, positive_threshold, beta, training, validation, train_batch_size, use_hard_negative, sampling_method):
 
     logging.info("Pre-processing training/validation dataset: ")
@@ -58,7 +55,6 @@ def preprocessing_dataset(cls, positive_threshold, beta, training, validation, t
              return InputExample(texts=[x['text1'], negatives_sym], label=float(0))
         else:
              hard_negatives_sym = bi_encoder(x['text1'], x['text2'])[0]
-             #print(hard_negatives_sym)
              return InputExample(texts=[x['text1'], hard_negatives_sym],label=float(0))
 
     def contruct_instance(x):
@@ -75,9 +71,6 @@ def preprocessing_dataset(cls, positive_threshold, beta, training, validation, t
     
     return (train_dataloader, evaluator)
 
-
-
-
 def build_model(model_path, max_seq_length):
     logging.info("Build model from: " + model_path)
     word_embedding_model = models.Transformer(model_path,
@@ -91,7 +84,6 @@ def build_model(model_path, max_seq_length):
     model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
     return model
 
-
 def train_func(model, model_path, train_dataloader, evaluator):
     logging.info("Training: ")
     train_loss = losses.CosineSimilarityLoss(model=model)
@@ -102,8 +94,6 @@ def train_func(model, model_path, train_dataloader, evaluator):
               warmup_steps=math.ceil(len(train_dataloader) * 0.1),
               output_path=model_path,
               show_progress_bar=True)
-
-
 
 if __name__=='__main__':
     logging.info("Loading datasets: ")
@@ -131,7 +121,6 @@ if __name__=='__main__':
         alpha = 0.8+ 0.015*num_epoch
         sampling_method = 'multinomial'
         #sampling_method: ['topK', 'topK_with_E-FN', 'larger_than_true', 'larger_than_true_with_E-FN', 'multinomial', 'multinomial_with_E-FN']
-
         s_contentemb = []
         for doc_id in range(len(con)):
             words = con[doc_id]
@@ -143,8 +132,6 @@ if __name__=='__main__':
                 s_contentemb.append(emd)
         output2 = open(loc, 'wb')
         pickle.dump(s_contentemb, output2)
-
-
         beta = 0.95
         start_row = 0
         end_row = 1700
@@ -154,7 +141,6 @@ if __name__=='__main__':
             start_row += 1700
             end_row += 1700
             train_dataloader, evaluator = preprocessing_dataset(cls, positive_threshold, beta, train_batch, validation, train_batch_size, use_hard_negative, sampling_method)
-
             model = build_model(model_path, max_seq_length)
             train_func(model, model_path, train_dataloader, evaluator)
             cls = Candidate_Ranker(model_path=model_path)

@@ -14,13 +14,7 @@ import statistics
 class Candidate_Ranker(object):
     
     def __init__(self,model_path = 'models/bert'):
-        """
-        Initializes the candidate ranker object.
-    
-        Args:
-        model_path (str): Path to the trained model.
-        """
-        self.bi_encoder = SentenceTransformer(model_path)  # , device = 'cpu'
+        self.bi_encoder = SentenceTransformer(model_path)
         self.candidates = []
         self.candidates_path = '../data_tgcn/mr/build_train/candidates1.txt'
         f = open(self.candidates_path, 'r', encoding="utf-8")
@@ -49,7 +43,7 @@ class Candidate_Ranker(object):
         self.bi_encoder = SentenceTransformer(model_path) #, device = 'cpu'
         self.candidates_embeddings = self.bi_encoder.encode(self.candidates1, convert_to_tensor=True, device='cuda')
     def retrieve_top_k(self,emb, embs, k = 10, metric='cosine'):
-        """检索与查询节点最相似的前k个候选节点"""
+        """Retrieve the top k candidate nodes that are most similar to the query node."""
         if metric == 'cosine':
             similarities = F.cosine_similarity(emb,embs, dim=-1)
         elif metric == 'euclidean':
@@ -63,21 +57,8 @@ class Candidate_Ranker(object):
         return results
     # This function will search all standard symptoms for queries that match the query
     def search_candidates(self, query, top_k = 5, return_scores= False, threshold = 0):
-        """
-        Returns a list of the top_k candidate symptoms that match the input query.
-
-        Args:
-        query (str): Input query string.
-        top_k (int): Number of top results to return.
-        return_scores (bool): If true, returns scores of each candidate along with its name.
-        threshold (float): Minimum score threshold for a candidate to be considered a match.
-
-        Returns:
-        A list of candidate symptoms that match the input query.
-        """
         question_embedding = self.bi_encoder.encode(query, convert_to_tensor=True, device ='cuda')
         hits = util.semantic_search(question_embedding, self.candidates_embeddings, top_k = top_k)
-
         hits = hits[0]
         if return_scores:
             hits = [(self.candidates1[hit['corpus_id']],hit['score']) for hit in hits if hit['score']>threshold]
@@ -91,27 +72,12 @@ class Candidate_Ranker(object):
         return indices[:k]
 
     def search_hard_negatives(self, anchor = 'query', query = None, true_candidate = None, sampling_method = 'topK', positive_threshold = 0.5, beta = 1,num_negatives = 1,index = 0):
-        """
-        Finds hard negative candidates to be used for training.
-
-        Args:
-        anchor (str): Whether to anchor the search to the 'query' or 'candidate'.
-        query (str): Input query string.
-        true_candidate (str): The correct symptom candidate.
-        sampling_method (str): The method to use for sampling hard negative candidates.
-        positive_threshold (float): Minimum threshold for a candidate to be considered a positive match.
-        beta (float): Threshold for beta-negative examples (used in certain sampling methods).
-        num_negatives (int): Number of negative candidates to return.
-
-        Returns:
-        A list of hard negative symptom candidates for training.
-        """
+        """Finds hard negative candidates to be used for training."""
         a = []
         b = []
         score = 0
         score_true = self.cos_sim(query, true_candidate)[0]
         if anchor == 'query':
-           #bywyf
            candidates = []
            candidates.append(query)
            # candidates.append(true_candidate)
@@ -132,16 +98,8 @@ class Candidate_Ranker(object):
            a = query_embeddings
            # b = true_candidate_query_embeddings
            candidates_embeddings = emb[:len(emb)-1, :]
-           #endbywyf
            hits = util.semantic_search(query_embeddings, candidates_embeddings, top_k=len(self.candidates))
            hits = hits[0]
-           """
-           self.candidates[hit['corpus_id']]：使用 hit['corpus_id'] 作为索引从候选项列表 self.candidates 中获取对应的文本表示。
-           min(max(hit['score'], 0.001), 1)：对 hit['score'] 进行截断，确保其值介于 0.001 和 1 之间。这一步操作可能用于控制相似度得分的范围，确保得分不会过高或过低。
-           其中第一个元素是候选项的文本表示，第二个元素是相似度分数。
-           """
-
-
            # hits = name
            hits = [(self.candidates[hit['corpus_id']],min(max(hit['score'],0.001),1),hit['corpus_id']) for hit in hits if self.candidates[hit['corpus_id']]!=true_candidate]
            # hits_cp = [item for item in hits if item[1] >= positive_threshold]  # positive predictions
@@ -216,7 +174,6 @@ class Candidate_Ranker(object):
              probs = [item[1] for item in hits_cp]
              candts = [item[0] for item in hits_cp]
              indices = self.topk(probs, num_negatives)
-
 
         elif sampling_method == 'multinomial1':
            res = []

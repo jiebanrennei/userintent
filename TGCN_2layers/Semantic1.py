@@ -1,4 +1,3 @@
-#Add by wyf
 import os
 from sentence_transformers import SentenceTransformer
 from nltk.corpus import wordnet as wn
@@ -8,21 +7,16 @@ import pickle
 def Semantic(yic_content,location):
     model_path = 'models/bert'
     bi_encoder = SentenceTransformer(model_path)
-    # 路径设置
     os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     os.path.abspath(os.path.dirname(os.getcwd()))
     os.path.abspath(os.path.join(os.getcwd(), ".."))
-    # dataset: 20ng  mr  ohsumed R8 R52
     dataset = 'mr'
     input = os.sep.join(['..', 'data_tgcn', dataset, 'build_train', dataset])
     # output = os.sep.join(['..', 'data_tgcn', dataset, 'stanford'])
     output = os.sep.join(['..', 'data_tgcn', dataset, 'lstm'])
-    # print(input3)'..\\data_tgcn\\mr\\lstm'
 
     f = open(output + location.format(dataset), 'rb')
-    # 使用load的方法将数据从pkl文件中读取出来
     data = pickle.load(f)
-    # 关闭文件
     f.close()
 
     stop_words = set()

@@ -12,11 +12,9 @@ import string
 string.punctuation
 def Syntactic(yic_content):
     nlp = StanfordCoreNLP(r'../stanford-corenlp-full-2017-06-09', lang='zh')
-#路径设置
 os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 os.path.abspath(os.path.dirname(os.getcwd()))
 os.path.abspath(os.path.join(os.getcwd(), ".."))
-#dataset: 20ng  mr  ohsumed R8 R52
 dataset ='mr'
 input = os.sep.join(['..', 'data_tgcn', dataset, 'build_train', dataset])
 output = os.sep.join(['..', 'data_tgcn', dataset, 'lstm'])

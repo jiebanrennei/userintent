@@ -14,7 +14,6 @@ from BidirectionalHardNegativesRankingLoss import BidirectionalHardNegativesRank
 from candidate_ranker import Candidate_Ranker
 pd.set_option('mode.chained_assignment', None)
 
-# build corpus
 dataset = 'mr'
 os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 os.path.abspath(os.path.dirname(os.getcwd()))
@@ -22,17 +21,14 @@ os.path.abspath(os.path.join(os.getcwd(), ".."))
 input1 = os.sep.join(['..', 'data_tgcn', dataset, 'build_train', dataset])
 
 count = 0
-
 def increment():
     global count
     count += 1
     return count
 
-# Preprocess the dataset for training and validation 预处理数据集用于训练和验证
 def preprocessing_dataset(cls, positive_threshold, beta, training, validation, train_batch_size,
                           num_hard_negative_queries, num_hard_negative_candidates, sampling_method):
     logging.info("Pre-processing training/validation dataset: ")
-
     # Define a function to generate (positive, hard negative) pairs
     def bi_encoder(index,query, true_candidate):
         predictions_candidate = cls.search_hard_negatives(anchor='query', query=query, true_candidate=true_candidate,
@@ -50,32 +46,23 @@ def preprocessing_dataset(cls, positive_threshold, beta, training, validation, t
         count = increment()
         print(count)
         return (predictions_candidate, predictions_query)
-        # return (predictions_query,predictions_candidate)
-
-    # Define a function to create training examples
     def contruct_training_instance(x, row_index):
         hard_negatives_sym, hard_negatives_query = bi_encoder(row_index,x['text1'], x['text2'])
         return InputExample(texts=[x['text1'], *hard_negatives_query, x['text2'], *hard_negatives_sym],
                             label=float(x['label']))
 
-    # Define a function to create validation examples
     def contruct_instance(x):
         return InputExample(texts=[x['text1'], x['text2']], label=float(x['label']))
 
-    # Generate training examples
     training['training_instances'] = training.apply(lambda x: contruct_training_instance(x, x.name), axis=1)
     train_examples = training['training_instances'].tolist()
     train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=train_batch_size)
 
-    # Generate validation examples
     validation['validation_instances'] = validation.apply(contruct_instance, axis=1)
     validation_examples = validation['validation_instances'].tolist()
     evaluator = EmbeddingSimilarityEvaluator.from_input_examples(validation_examples, name='sym-dev')
-
     return (train_dataloader, evaluator)
 
-
-# Constructing the model
 def build_model(model_path, max_seq_length):
     logging.info("Build model from: " + model_path)
     word_embedding_model = models.Transformer(model_path,
@@ -89,15 +76,10 @@ def build_model(model_path, max_seq_length):
     model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
     return model
 
-
-# Training function
 def train_func(model, model_path, train_dataloader, evaluator, num_hard_negatives):
     logging.info("Training: ")
 
-    # Use BidirectionalHardNegativesRankingLoss to train the model
     train_loss = BidirectionalHardNegativesRankingLoss(model=model, num_hard_negatives_query=num_hard_negatives)
-
-    # Fit the model on the training datas
     model.fit(train_objectives=[(train_dataloader, train_loss)],
               evaluator=evaluator,
               epochs=1,
@@ -106,8 +88,6 @@ def train_func(model, model_path, train_dataloader, evaluator, num_hard_negative
               warmup_steps=math.ceil(len(train_dataloader) * 0.1),
               output_path=model_path,
               show_progress_bar=True)
-
-
 
 if __name__ == '__main__':
     training = pd.read_csv('../data/training_ct4.csv', sep='\t')
@@ -139,9 +119,9 @@ if __name__ == '__main__':
         print("epoch:",epoch)
         max_seq_length = 32
         cls = Candidate_Ranker(model_path = model_path)
-        positive_threshold = 0.5  # 用于确定正样本的阈值。
+        positive_threshold = 0.5  # It is used to determine the threshold of positive samples.
         beta = 0.9997
-        num_hard_negative_queries = 10  # 每个正样本对应的硬否定样本数量。
+        num_hard_negative_queries = 10  # The number of hard negative samples corresponding to each positive sample.
         num_hard_negative_candidates = 3
         sampling_method = 'multinomial'
 

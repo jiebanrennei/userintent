@@ -13,7 +13,6 @@ import Evaluation
 from candidate_ranker import Candidate_Ranker
 import pickle
 
-
 with open ('../data/candidates', 'rb') as fp:
         candidates = pickle.load(fp)
 
@@ -39,7 +38,6 @@ def tune_beta(cls, validation, alpha):
           else:
               beta = beta+0.015
     return beta
-
 
 def preprocessing_dataset(cls, positive_threshold, beta, training, validation, train_batch_size, use_hard_negative, sampling_method):
 
@@ -98,8 +96,6 @@ def train_func(model, model_path, train_dataloader, evaluator):
               output_path=model_path,
               show_progress_bar=True)
 
-
-
 if __name__=='__main__':
     training = pd.read_csv('../data/training_ct3.csv', sep='\t')
     validation = pd.read_csv('../data/validation.csv', sep='\t')
@@ -116,7 +112,6 @@ if __name__=='__main__':
     model_path = 'models/bert'
     for i in range(epoch):
        num_epoch = i
-
 
        #training = training.sample(n=100)
        # hyper-parameters

@@ -22,17 +22,12 @@ class GCN1(nn.Module):
         super(GCN1, self).__init__()
         self.conv1 = GraphConvolution(input_dim, hidden_dim)
         self.conv2 = GraphConvolution(hidden_dim, output_dim)
-
     def forward(self,x,adj):
-
         x = self.conv1(x, adj)
         x = self.conv2(x, adj)
-
         stacked_tensor = torch.stack((x[0], x[1]))
         emd = torch.mean(stacked_tensor, dim=0)
-
         stacked_tensor = torch.stack((emd, x[2]))
         emd = torch.mean(stacked_tensor, dim=0)
-
         return emd
 
